@@ -7,7 +7,7 @@ const playerScoreElement = document.getElementById('playerScore');
 const aiScoreElement = document.getElementById('aiScore');
 const messageElement = document.getElementById('message');
 const moveLogBody = document.getElementById('moveLogBody');
-const colorSelector = document.getElementById('playerColor');
+const playerColorSelector = document.getElementById('playerColor');
 
 let board = [];
 let currentPlayer = 'player';
@@ -29,11 +29,17 @@ const initBoard = () => {
     board[4][3] = 'black';
     board[4][4] = 'white';
     currentPlayer = 'white';
-    renderBoard();
-    updateScores();
+    moveCount = 0;
     messageElement.textContent = '';
     moveLogBody.innerHTML = '';
-    moveCount = 0;
+    renderBoard();
+    updateScores();
+    
+    if (playerColor === 'black') {
+        setTimeout(() => {
+            aiMove();
+        }, 100);
+    }
 };
 
 const renderBoard = () => {
@@ -74,11 +80,13 @@ const handleTileClick = (row, col) => {
     messageElement.textContent = '';
     renderBoard();
     updateScores();
-    checkWinCondition();
     
-    if (currentPlayer === aiColor) {
-        setTimeout(aiMove, 500);
-    }
+    setTimeout(() => {
+        checkWinCondition();
+        if (currentPlayer === aiColor) {
+            aiMove();
+        }
+    }, 500);
 };
 
 const isValidMove = (row, col, player, testMode = false, testBoard = board) => {
@@ -150,6 +158,8 @@ const makeMove = (row, col, player, testMode = false, testBoard = board) => {
 };
 
 const aiMove = () => {
+    if (currentPlayer !== aiColor) return;
+    
     const validMoves = [];
     board.forEach((row, rowIndex) => {
         row.forEach((tile, colIndex) => {
@@ -191,7 +201,10 @@ const aiMove = () => {
     currentPlayer = playerColor;
     renderBoard();
     updateScores();
-    checkWinCondition();
+    
+    setTimeout(() => {
+        checkWinCondition();
+    }, 500);
 };
 
 const minimax = (boardState, player, depth) => {
@@ -359,8 +372,8 @@ themeSelector.addEventListener('change', (e) => {
     }
 });
 
-colorSelector.addEventListener('change', (e) => {
-    playerColor = e.target.value;
+playerColorSelector.addEventListener('change', () => {
+    playerColor = playerColorSelector.value;
     aiColor = playerColor === 'white' ? 'black' : 'white';
     initBoard();
 });

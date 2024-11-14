@@ -268,3 +268,123 @@ select {
 .color-select {
     margin: 10px 0;
 }
+
+/* For tablets and smaller screens */
+@media screen and (max-width: 1024px) {
+    .game-area {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .right-panel {
+        margin-left: 0;
+        margin-top: 20px;
+        width: 100%;
+        max-width: 500px;
+    }
+}
+
+/* For mobile phones */
+@media screen and (max-width: 600px) {
+    .container {
+        width: 95%;
+        padding: 10px;
+    }
+    
+    h1 {
+        font-size: 24px;
+        margin: 10px 0;
+    }
+
+    .board {
+        grid-template-columns: repeat(8, 40px);
+        grid-template-rows: repeat(8, 40px);
+        gap: 1px;
+    }
+
+    .tile {
+        width: 40px;
+        height: 40px;
+    }
+
+    .tile.white::after, .tile.black::after {
+        width: 32px;
+        height: 32px;
+    }
+
+    .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .controls button, 
+    .controls select {
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    .move-log-container {
+        height: 200px;
+    }
+
+    .move-log-table th, 
+    .move-log-table td {
+        padding: 4px;
+        font-size: 14px;
+    }
+
+    /* Improve touch targets */
+    button, select {
+        min-height: 44px;
+        padding: 10px;
+        font-size: 16px;
+    }
+
+    /* Prevent text scaling */
+    body {
+        -webkit-text-size-adjust: 100%;
+    }
+}
+
+/* For very small screens */
+@media screen and (max-width: 350px) {
+    .board {
+        grid-template-columns: repeat(8, 35px);
+        grid-template-rows: repeat(8, 35px);
+    }
+
+    .tile {
+        width: 35px;
+        height: 35px;
+    }
+
+    .tile.white::after, .tile.black::after {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+/* Prevent scrolling on iOS when tapping elements */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Add smooth scrolling for better mobile experience */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Improve button and select styling for mobile */
+button, select {
+    touch-action: manipulation;
+}
+
+/* Add these base styles to ensure proper mobile rendering */
+.container {
+    box-sizing: border-box;
+}
+
+*, *:before, *:after {
+    box-sizing: inherit;
+}
