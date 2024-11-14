@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Reversi Game</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Reversi</h1>
+        <div class="game-area">
+            <div id="board" class="board"></div>
+            <div class="right-panel">
+                <div class="controls">
+                    <button id="resetButton">Reset Game</button>
+                    <label for="difficulty">AI Difficulty:</label>
+                    <select id="difficulty">
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                    <button id="passButton">Pass Turn</button>
+                </div>
+                <div class="score">
+                    <p>Player: <span id="playerScore">2</span></p>
+                    <p>AI: <span id="aiScore">2</span></p>
+                </div>
+                <div class="theme-toggle">
+                    <label for="theme">Theme:</label>
+                    <select id="theme">
+                        <option value="classic">Classic</option>
+                        <option value="neon">Neon</option>
+                        <option value="dark">Dark</option>
+                    </select>
+                </div>
+                <div id="message" class="message"></div>
+                <div class="move-log">
+                    <h3>Move Log</h3>
+                    <div id="moveLogContainer" class="move-log-container">
+                        <table id="moveLogTable" class="move-log-table">
+                            <thead>
+                                <tr>
+                                    <th>Move #</th>
+                                    <th>Player</th>
+                                    <th>Position</th>
+                                    <th>Flipped Tiles</th>
+                                </tr>
+                            </thead>
+                            <tbody id="moveLogBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
