@@ -7,6 +7,7 @@ const playerScoreElement = document.getElementById('playerScore');
 const aiScoreElement = document.getElementById('aiScore');
 const messageElement = document.getElementById('message');
 const moveLogBody = document.getElementById('moveLogBody');
+const moveLogContainer = document.getElementById('moveLogContainer');
 const playerColorSelector = document.getElementById('playerColor');
 
 let board = [];
@@ -173,7 +174,14 @@ const aiMove = () => {
         messageElement.textContent = 'AI has no valid moves. AI passes turn.';
         currentPlayer = playerColor;
         renderBoard();
-        checkWinCondition();
+        
+        setTimeout(() => {
+            messageElement.textContent = '';
+            if (!hasValidMoves(board, playerColor)) {
+                checkWinCondition();
+            }
+        }, 2000);
+        
         return;
     }
 
@@ -301,18 +309,47 @@ const passTurn = () => {
     }
 };
 
-const logMove = (row, col, flips) => {
-    moveCount++;
-    const player = currentPlayer === 'player' ? 'Player' : 'AI';
-    const newRow = document.createElement('tr');
-    newRow.innerHTML = `
-        <td>${moveCount}</td>
-        <td>${player}</td>
-        <td>(${row + 1}, ${col + 1})</td>
-        <td>${flips}</td>
+function positionToNotation(row, col) {
+    const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    const rows = ['8', '7', '6', '5', '4', '3', '2', '1']; // Reversed to match chess notation
+    return `${columns[col]}${rows[row]}`;
+}
+
+function highlightMove(row, col) {
+    const tiles = document.querySelectorAll('.tile');
+    const index = row * 8 + col;
+    const tile = tiles[index];
+    if (tile) {
+        tile.classList.add('highlight-move');
+    }
+}
+
+function removeHighlight() {
+    document.querySelectorAll('.highlight-move').forEach(tile => {
+        tile.classList.remove('highlight-move');
+    });
+}
+
+function logMove(row, col, flippedCount) {
+    const moveNumber = moveLogBody.children.length + 1;
+    const position = positionToNotation(row, col);
+    const tr = document.createElement('tr');
+    tr.dataset.row = row;
+    tr.dataset.col = col;
+    
+    tr.innerHTML = `
+        <td>${moveNumber}</td>
+        <td>${currentPlayer === playerColor ? 'Player' : 'AI'}</td>
+        <td>${position}</td>
+        <td>${flippedCount}</td>
     `;
-    moveLogBody.insertBefore(newRow, moveLogBody.firstChild);
-};
+
+    tr.addEventListener('mouseenter', () => highlightMove(row, col));
+    tr.addEventListener('mouseleave', () => removeHighlight());
+    
+    moveLogBody.appendChild(tr);
+    moveLogContainer.scrollTop = moveLogContainer.scrollHeight;
+}
 
 const updateScores = () => {
     let whiteScore = 0;
@@ -332,31 +369,60 @@ const updateScores = () => {
     }
 };
 
+function showGameOverModal(message) {
+    // Create modal elements
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'modal-overlay';
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    
+    modal.innerHTML = `
+        <h2 class="modal-title">Game Over!</h2>
+        <p class="modal-message">${message}</p>
+        <div class="modal-buttons">
+            <button class="modal-button primary" id="playAgainBtn">Play Again</button>
+            <button class="modal-button secondary" id="closeModalBtn">Close</button>
+        </div>
+    `;
+    
+    modalOverlay.appendChild(modal);
+    document.body.appendChild(modalOverlay);
+    
+    // Add animation classes after a brief delay
+    requestAnimationFrame(() => {
+        modalOverlay.classList.add('show');
+        modal.classList.add('show');
+    });
+    
+    // Handle button clicks
+    document.getElementById('playAgainBtn').addEventListener('click', () => {
+        modalOverlay.remove();
+        initBoard();
+    });
+    
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+        modalOverlay.remove();
+    });
+}
+
 const checkWinCondition = () => {
-    if (isGameOver(board)) {
+    const hasPlayerMoves = hasValidMoves(board, playerColor);
+    const hasAIMoves = hasValidMoves(board, aiColor);
+    
+    if (!hasPlayerMoves && !hasAIMoves) {
         const playerScore = parseInt(playerScoreElement.textContent);
         const aiScore = parseInt(aiScoreElement.textContent);
+        
+        let message;
         if (playerScore > aiScore) {
-            messageElement.textContent = 'Game over. You win!';
+            message = `Congratulations! You win!\nFinal Score - Player: ${playerScore}, AI: ${aiScore}`;
         } else if (aiScore > playerScore) {
-            messageElement.textContent = 'Game over. AI wins!';
+            message = `Game over. AI wins!\nFinal Score - Player: ${playerScore}, AI: ${aiScore}`;
         } else {
-            messageElement.textContent = 'Game over. A tie!';
+            message = `It's a tie!\nFinal Score - Player: ${playerScore}, AI: ${aiScore}`;
         }
-        setTimeout(() => {
-            if (confirm('Game over. Would you like to play again?')) {
-                initBoard();
-            }
-        }, 1000);
-    } else if (!hasValidMoves(board, currentPlayer)) {
-        messageElement.textContent = `No valid moves for ${currentPlayer === playerColor ? 'Player' : 'AI'}. Turn passed.`;
-        currentPlayer = currentPlayer === playerColor ? aiColor : playerColor;
-        setTimeout(() => {
-            messageElement.textContent = '';
-            if (currentPlayer === aiColor) {
-                aiMove();
-            }
-        }, 1500);
+        showGameOverModal(message);
     }
 };
 
@@ -379,3 +445,37 @@ playerColorSelector.addEventListener('change', () => {
 });
 
 document.addEventListener('DOMContentLoaded', initBoard);
+
+function createBoardCoordinates() {
+    const boardContainer = document.querySelector('.board-container');
+    const tileSize = 45; // Match your tile size
+    const padding = 30; // Match container padding
+    
+    // Create column labels (A-H)
+    for (let i = 0; i < 8; i++) {
+        const label = document.createElement('div');
+        label.className = 'coordinate-label coordinate-column';
+        label.textContent = String.fromCharCode(65 + i); // A, B, C, etc.
+        // Align directly under each column
+        label.style.left = `${padding + (i * tileSize) + (tileSize / 2)}px`;
+        label.style.bottom = '2px'; // Move closer to board
+        boardContainer.appendChild(label);
+    }
+    
+    // Create row labels (1-8)
+    for (let i = 0; i < 8; i++) {
+        const label = document.createElement('div');
+        label.className = 'coordinate-label coordinate-row';
+        label.textContent = 8 - i; // 8, 7, 6, etc.
+        // Align directly beside each row
+        label.style.top = `${padding + (i * tileSize) + (tileSize / 2)}px`;
+        label.style.right = '2px'; // Move closer to board
+        boardContainer.appendChild(label);
+    }
+}
+
+// Call createBoardCoordinates after the board is initialized
+document.addEventListener('DOMContentLoaded', () => {
+    initBoard();
+    createBoardCoordinates();
+});
