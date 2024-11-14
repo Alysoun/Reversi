@@ -41,18 +41,6 @@ body {
     opacity: 0.8;
     transform: scale(1.05);
 }
-.tile.player {
-    background-color: #000;
-    border-radius: 50%;
-    box-shadow: 0 0 5px rgba(0,0,0,0.3);
-    transition: background-color 0.4s ease;
-}
-.tile.ai {
-    background-color: #fff;
-    border-radius: 50%;
-    box-shadow: 0 0 5px rgba(0,0,0,0.3);
-    transition: background-color 0.4s ease;
-}
 .right-panel {
     display: flex;
     flex-direction: column;
@@ -198,12 +186,26 @@ select {
     transform-style: preserve-3d;
     backface-visibility: hidden;
 }
-.tile.player, .tile.ai {
+.tile.white::after, .tile.black::after {
+    content: '';
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    box-shadow: 0 0 5px rgba(0,0,0,0.3);
-    transition: background-color 0.4s ease;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
-/* Move Log Table Headers */
+.tile.white::after {
+    background-color: #fff;
+    border: 1px solid #000;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+.tile.black::after {
+    background-color: #000;
+    border: 1px solid #fff;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
 .move-log-table th {
     background-color: #f2f2f2;
     color: #333;
@@ -211,22 +213,17 @@ select {
     font-weight: bold;
     border: 1px solid #ccc;
 }
-
-/* Theme-specific header styles */
 .neon-theme .move-log-table th {
     background-color: #1a1a1a;
     color: #ff1177;
     border-color: #ff1177;
     text-shadow: 0 0 5px #ff1177;
 }
-
 .dark-theme .move-log-table th {
     background-color: #333;
     color: #fff;
     border-color: #555;
 }
-
-/* Move Log Table Cells */
 .move-log-table td {
     padding: 8px;
     text-align: center;
@@ -234,30 +231,16 @@ select {
     background-color: #fff;
     color: #333;
 }
-
 .neon-theme .move-log-table td {
     background-color: rgba(0, 0, 0, 0.8);
     border-color: #ff1177;
     color: #fff;
 }
-
 .dark-theme .move-log-table td {
     background-color: #2a2a2a;
     border-color: #555;
     color: #fff;
 }
-
-/* Update piece colors */
-.tile.white {
-    background-color: #fff;
-    border: 1px solid #000;
-}
-
-.tile.black {
-    background-color: #000;
-    border: 1px solid #fff;
-}
-
 .tile.valid-move {
     background-color: #4CAF50;
     opacity: 0.6;
@@ -265,30 +248,23 @@ select {
     border: 2px solid #45a049;
     box-shadow: inset 0 0 10px rgba(0,255,0,0.3);
 }
-
-/* Add pulse animation */
 @keyframes pulse {
     0% { transform: scale(1); opacity: 0.6; }
     50% { transform: scale(1.05); opacity: 0.8; }
     100% { transform: scale(1); opacity: 0.6; }
 }
-
-/* Theme-specific valid move indicators */
 .neon-theme .tile.valid-move {
     background-color: #00ff00;
     box-shadow: 0 0 10px #00ff00;
     border-color: #00ff00;
     opacity: 0.4;
 }
-
 .dark-theme .tile.valid-move {
     background-color: #45a049;
     box-shadow: 0 0 10px rgba(69,160,73,0.5);
     border-color: #45a049;
     opacity: 0.7;
 }
-
-/* Style for the color selector */
 .color-select {
     margin: 10px 0;
 }
