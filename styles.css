@@ -246,3 +246,24 @@ select {
     border-color: #555;
     color: #fff;
 }
+
+/* Update piece colors */
+.tile.white {
+    background-color: #fff;
+    border: 1px solid #000;
+}
+
+.tile.black {
+    background-color: #000;
+    border: 1px solid #fff;
+}
+
+.tile.valid-move {
+    background-color: #4CAF50;
+    opacity: 0.6;
+}
+
+/* Style for the color selector */
+.color-select {
+    margin: 10px 0;
+}

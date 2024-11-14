@@ -7,10 +7,13 @@ const playerScoreElement = document.getElementById('playerScore');
 const aiScoreElement = document.getElementById('aiScore');
 const messageElement = document.getElementById('message');
 const moveLogBody = document.getElementById('moveLogBody');
+const colorSelector = document.getElementById('playerColor');
 
 let board = [];
 let currentPlayer = 'player';
 let moveCount = 0;
+let playerColor = 'white';  // 'white' or 'black'
+let aiColor = 'black';      // opposite of playerColor
 
 const directions = [
     { row: -1, col: 0 }, { row: 1, col: 0 }, // Vertical
@@ -21,10 +24,11 @@ const directions = [
 
 const initBoard = () => {
     board = Array(8).fill(null).map(() => Array(8).fill(null));
-    board[3][3] = 'ai';
-    board[3][4] = 'player';
-    board[4][3] = 'player';
-    board[4][4] = 'ai';
+    board[3][3] = 'white';
+    board[3][4] = 'black';
+    board[4][3] = 'black';
+    board[4][4] = 'white';
+    currentPlayer = 'white';
     renderBoard();
     updateScores();
     messageElement.textContent = '';
@@ -38,27 +42,43 @@ const renderBoard = () => {
         row.forEach((tile, colIndex) => {
             const tileElement = document.createElement('div');
             tileElement.classList.add('tile');
-            if (tile === 'player') tileElement.classList.add('player');
-            if (tile === 'ai') tileElement.classList.add('ai');
-            tileElement.addEventListener('click', () => handleTileClick(rowIndex, colIndex));
+            if (tile === 'white') tileElement.classList.add('white');
+            if (tile === 'black') tileElement.classList.add('black');
+            
+            if (currentPlayer === playerColor) {
+                tileElement.addEventListener('click', () => handleTileClick(rowIndex, colIndex));
+            }
+            
+            if (currentPlayer === playerColor && 
+                tile === null && 
+                isValidMove(rowIndex, colIndex, playerColor)) {
+                tileElement.classList.add('valid-move');
+            }
+            
             boardElement.appendChild(tileElement);
         });
     });
 };
 
 const handleTileClick = (row, col) => {
-    if (board[row][col] !== null || !isValidMove(row, col, currentPlayer)) {
+    if (currentPlayer !== playerColor) return;
+    
+    if (board[row][col] !== null || !isValidMove(row, col, playerColor)) {
         messageElement.textContent = 'Invalid move. Please select a valid tile.';
         return;
     }
-    const flippedTiles = makeMove(row, col, currentPlayer);
+    
+    const flippedTiles = makeMove(row, col, playerColor);
     logMove(row, col, flippedTiles.length);
-    currentPlayer = currentPlayer === 'player' ? 'ai' : 'player';
+    currentPlayer = aiColor;
     messageElement.textContent = '';
     renderBoard();
     updateScores();
     checkWinCondition();
-    if (currentPlayer === 'ai') aiMove();
+    
+    if (currentPlayer === aiColor) {
+        setTimeout(aiMove, 500);
+    }
 };
 
 const isValidMove = (row, col, player, testMode = false, testBoard = board) => {
@@ -110,18 +130,15 @@ const makeMove = (row, col, player, testMode = false, testBoard = board) => {
     }
 
     if (!testMode) {
-        // Add animation class to flipped tiles
         const tiles = document.querySelectorAll('.tile');
         flippedTiles.forEach(({ row, col }) => {
             const index = row * 8 + col;
             const tile = tiles[index];
             tile.classList.add('flipping');
-            // Remove the class after animation completes
             setTimeout(() => {
                 tile.classList.remove('flipping');
-            }, 800); // Match this to animation duration
+            }, 800);
         });
-        // Also animate the newly placed piece
         const placedTile = tiles[row * 8 + col];
         placedTile.classList.add('flipping');
         setTimeout(() => {
@@ -151,10 +168,8 @@ const aiMove = () => {
     let selectedMove;
 
     if (difficulty === 'easy') {
-        // Easy: Random valid move
         selectedMove = validMoves[Math.floor(Math.random() * validMoves.length)];
     } else if (difficulty === 'medium') {
-        // Medium: Choose the move that flips the most tiles
         let maxFlips = 0;
         validMoves.forEach(({ row, col }) => {
             const flips = makeMove(row, col, 'ai', true).length;
@@ -164,7 +179,6 @@ const aiMove = () => {
             }
         });
     } else if (difficulty === 'hard') {
-        // Hard: Minimax strategy
         selectedMove = minimax(board, 'ai', 3).move;
     }
 
@@ -244,14 +258,19 @@ const isGameOver = (boardState) => {
 };
 
 const passTurn = () => {
+    const currentColorToCheck = currentPlayer === playerColor ? playerColor : aiColor;
     const validMoves = board.some((row, rowIndex) =>
-        row.some((tile, colIndex) => isValidMove(rowIndex, colIndex, currentPlayer))
+        row.some((tile, colIndex) => 
+            tile === null && isValidMove(rowIndex, colIndex, currentColorToCheck))
     );
+    
     if (!validMoves) {
-        messageElement.textContent = currentPlayer === 'player' ? 'No valid moves. You pass your turn.' : 'AI passes turn.';
-        currentPlayer = currentPlayer === 'player' ? 'ai' : 'player';
+        messageElement.textContent = `No valid moves. ${currentPlayer === playerColor ? 'Player' : 'AI'} passes turn.`;
+        currentPlayer = currentPlayer === playerColor ? aiColor : playerColor;
         checkWinCondition();
-        if (currentPlayer === 'ai') aiMove();
+        if (currentPlayer === aiColor) {
+            setTimeout(aiMove, 500);
+        }
     } else {
         messageElement.textContent = 'You still have valid moves. You cannot pass.';
     }
@@ -312,6 +331,12 @@ themeSelector.addEventListener('change', (e) => {
     } else if (e.target.value === 'dark') {
         document.body.classList.add('dark-theme');
     }
+});
+
+colorSelector.addEventListener('change', (e) => {
+    playerColor = e.target.value;
+    aiColor = playerColor === 'white' ? 'black' : 'white';
+    initBoard();
 });
 
 document.addEventListener('DOMContentLoaded', initBoard);
