@@ -429,14 +429,42 @@ const checkWinCondition = () => {
 resetButton.addEventListener('click', initBoard);
 passButton.addEventListener('click', passTurn);
 
-themeSelector.addEventListener('change', (e) => {
-    document.body.className = '';
-    if (e.target.value === 'neon') {
-        document.body.classList.add('neon-theme');
-    } else if (e.target.value === 'dark') {
-        document.body.classList.add('dark-theme');
+// Theme initialization and event handling
+document.addEventListener('DOMContentLoaded', () => {
+    // Add event listener for theme changes
+    const themeSelector = document.getElementById('theme');
+    
+    if (themeSelector) {
+        themeSelector.addEventListener('change', (e) => {
+            switchTheme(e.target.value);
+        });
+        
+        // Load saved theme on page load
+        const savedTheme = localStorage.getItem('reversiTheme') || 'classic';
+        themeSelector.value = savedTheme;
+        switchTheme(savedTheme);
     }
 });
+
+// Theme switching function
+function switchTheme(theme) {
+    const body = document.body;
+    // Remove all existing theme classes
+    body.classList.remove(
+        'classic-theme',
+        'dark-theme',
+        'neon-theme',
+        'matrix-theme',
+        'cyberpunk-theme',
+        'ocean-theme'
+    );
+    
+    // Add the new theme class
+    body.classList.add(`${theme}-theme`);
+    
+    // Save theme preference
+    localStorage.setItem('reversiTheme', theme);
+}
 
 playerColorSelector.addEventListener('change', () => {
     playerColor = playerColorSelector.value;
