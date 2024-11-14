@@ -153,17 +153,20 @@ const aiMove = () => {
     const validMoves = [];
     board.forEach((row, rowIndex) => {
         row.forEach((tile, colIndex) => {
-            if (tile === null && isValidMove(rowIndex, colIndex, 'ai')) {
+            if (tile === null && isValidMove(rowIndex, colIndex, aiColor)) {
                 validMoves.push({ row: rowIndex, col: colIndex });
             }
         });
     });
+    
     if (validMoves.length === 0) {
         messageElement.textContent = 'AI has no valid moves. AI passes turn.';
-        currentPlayer = 'player';
+        currentPlayer = playerColor;
+        renderBoard();
         checkWinCondition();
         return;
     }
+
     const difficulty = difficultySelector.value;
     let selectedMove;
 
@@ -172,20 +175,20 @@ const aiMove = () => {
     } else if (difficulty === 'medium') {
         let maxFlips = 0;
         validMoves.forEach(({ row, col }) => {
-            const flips = makeMove(row, col, 'ai', true).length;
+            const flips = makeMove(row, col, aiColor, true).length;
             if (flips > maxFlips) {
                 maxFlips = flips;
                 selectedMove = { row, col };
             }
         });
     } else if (difficulty === 'hard') {
-        selectedMove = minimax(board, 'ai', 3).move;
+        selectedMove = minimax(board, aiColor, 3).move;
     }
 
     const { row, col } = selectedMove;
-    const flippedTiles = makeMove(row, col, 'ai');
+    const flippedTiles = makeMove(row, col, aiColor);
     logMove(row, col, flippedTiles.length);
-    currentPlayer = 'player';
+    currentPlayer = playerColor;
     renderBoard();
     updateScores();
     checkWinCondition();
@@ -290,16 +293,21 @@ const logMove = (row, col, flips) => {
 };
 
 const updateScores = () => {
-    let playerScore = 0;
-    let aiScore = 0;
+    let whiteScore = 0;
+    let blackScore = 0;
     board.forEach(row => {
         row.forEach(tile => {
-            if (tile === 'player') playerScore++;
-            if (tile === 'ai') aiScore++;
+            if (tile === 'white') whiteScore++;
+            if (tile === 'black') blackScore++;
         });
     });
-    playerScoreElement.textContent = playerScore;
-    aiScoreElement.textContent = aiScore;
+    if (playerColor === 'white') {
+        playerScoreElement.textContent = whiteScore;
+        aiScoreElement.textContent = blackScore;
+    } else {
+        playerScoreElement.textContent = blackScore;
+        aiScoreElement.textContent = whiteScore;
+    }
 };
 
 const checkWinCondition = () => {
