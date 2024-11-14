@@ -196,25 +196,29 @@ const aiMove = () => {
 
 const minimax = (boardState, player, depth) => {
     if (depth === 0 || isGameOver(boardState)) {
-        return { score: evaluateBoard(boardState) };
+        return { score: evaluateBoard(boardState, aiColor) };
     }
 
     const validMoves = [];
     boardState.forEach((row, rowIndex) => {
         row.forEach((tile, colIndex) => {
-            if (tile === null && isValidMove(rowIndex, colIndex, player)) {
+            if (tile === null && isValidMove(rowIndex, colIndex, player, true, boardState)) {
                 validMoves.push({ row: rowIndex, col: colIndex });
             }
         });
     });
 
+    if (validMoves.length === 0) {
+        return { score: evaluateBoard(boardState, aiColor) };
+    }
+
     let bestMove;
-    if (player === 'ai') {
+    if (player === aiColor) {
         let bestScore = -Infinity;
         validMoves.forEach(({ row, col }) => {
             const newBoard = JSON.parse(JSON.stringify(boardState));
-            makeMove(row, col, player, false, newBoard);
-            const score = minimax(newBoard, 'player', depth - 1).score;
+            makeMove(row, col, player, true, newBoard);
+            const score = minimax(newBoard, playerColor, depth - 1).score;
             if (score > bestScore) {
                 bestScore = score;
                 bestMove = { row, col };
@@ -225,8 +229,8 @@ const minimax = (boardState, player, depth) => {
         let bestScore = Infinity;
         validMoves.forEach(({ row, col }) => {
             const newBoard = JSON.parse(JSON.stringify(boardState));
-            makeMove(row, col, player, false, newBoard);
-            const score = minimax(newBoard, 'ai', depth - 1).score;
+            makeMove(row, col, player, true, newBoard);
+            const score = minimax(newBoard, aiColor, depth - 1).score;
             if (score < bestScore) {
                 bestScore = score;
                 bestMove = { row, col };
@@ -236,28 +240,33 @@ const minimax = (boardState, player, depth) => {
     }
 };
 
-const evaluateBoard = (boardState) => {
-    let aiScore = 0;
-    let playerScore = 0;
-    boardState.forEach(row => {
-        row.forEach(tile => {
-            if (tile === 'ai') aiScore++;
-            if (tile === 'player') playerScore++;
+const evaluateBoard = (boardState, maximizingColor) => {
+    let score = 0;
+    boardState.forEach((row, rowIndex) => {
+        row.forEach((tile, colIndex) => {
+            if (tile === maximizingColor) score++;
+            if (tile === (maximizingColor === 'white' ? 'black' : 'white')) score--;
         });
     });
-    return aiScore - playerScore;
+    return score;
 };
 
 const isGameOver = (boardState) => {
-    const validMovesPlayer = boardState.some((row, rowIndex) =>
-        row.some((tile, colIndex) => 
-            tile === null && isValidMove(rowIndex, colIndex, 'player', false, boardState))
-    );
-    const validMovesAI = boardState.some((row, rowIndex) =>
-        row.some((tile, colIndex) => 
-            tile === null && isValidMove(rowIndex, colIndex, 'ai', false, boardState))
-    );
-    return !validMovesPlayer && !validMovesAI;
+    const hasPlayerMoves = hasValidMoves(boardState, playerColor);
+    const hasAIMoves = hasValidMoves(boardState, aiColor);
+    
+    return !hasPlayerMoves && !hasAIMoves;
+};
+
+const hasValidMoves = (boardState, color) => {
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            if (boardState[row][col] === null && isValidMove(row, col, color, true, boardState)) {
+                return true;
+            }
+        }
+    }
+    return false;
 };
 
 const passTurn = () => {
@@ -326,6 +335,15 @@ const checkWinCondition = () => {
                 initBoard();
             }
         }, 1000);
+    } else if (!hasValidMoves(board, currentPlayer)) {
+        messageElement.textContent = `No valid moves for ${currentPlayer === playerColor ? 'Player' : 'AI'}. Turn passed.`;
+        currentPlayer = currentPlayer === playerColor ? aiColor : playerColor;
+        setTimeout(() => {
+            messageElement.textContent = '';
+            if (currentPlayer === aiColor) {
+                aiMove();
+            }
+        }, 1500);
     }
 };
 
