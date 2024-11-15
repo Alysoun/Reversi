@@ -1039,3 +1039,37 @@ select:focus {
 }
 
 /* Similar rules for other themes... */
+
+/* Mobile layout adjustments */
+@media screen and (max-width: 800px) {
+    .game-area {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    /* Reorder elements for mobile */
+    .right-panel {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 400px;
+        gap: 10px;
+    }
+
+    /* Move score directly under board */
+    .score {
+        order: -1; /* This moves it to the top of the right-panel flex container */
+        margin-top: 10px;
+        margin-bottom: 20px;
+    }
+
+    /* Adjust other controls spacing */
+    .controls {
+        margin-top: 10px;
+    }
+
+    .move-log-container {
+        margin-top: 10px;
+    }
+}
