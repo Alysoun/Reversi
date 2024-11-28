@@ -21,9 +21,11 @@
                     <button id="resetButton">Reset Game</button>
                     <label for="difficulty">AI Difficulty:</label>
                     <select id="difficulty">
+                        <option value="novice">Novice</option>
                         <option value="easy">Easy</option>
                         <option value="medium">Medium</option>
                         <option value="hard">Hard</option>
+                        <option value="expert">Expert</option>
                     </select>
                     <button id="passButton">Pass Turn</button>
                 </div>
@@ -64,6 +66,19 @@
                         <option value="black">Black (Second)</option>
                     </select>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div id="splashScreen" class="splash-screen">
+        <div class="splash-content">
+            <h2>Welcome to Reversi</h2>
+            <p>Select AI Difficulty Level</p>
+            <div class="difficulty-options">
+                <button class="difficulty-button" data-depth="1" data-weight="0.4">novice</button>
+                <button class="difficulty-button" data-depth="2" data-weight="0.6">easy</button>
+                <button class="difficulty-button" data-depth="3" data-weight="0.8">medium</button>
+                <button class="difficulty-button" data-depth="4" data-weight="1.0">hard</button>
+                <button class="difficulty-button" data-depth="5" data-weight="1.2">expert</button>
             </div>
         </div>
     </div>

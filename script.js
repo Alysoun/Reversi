@@ -23,6 +23,14 @@ const directions = [
     { row: 1, col: -1 }, { row: 1, col: 1 }  // Diagonal down
 ];
 
+const DIFFICULTY_SETTINGS = {
+    novice: { depth: 1, weight: 0.4 },
+    easy: { depth: 2, weight: 0.6 },
+    medium: { depth: 3, weight: 0.8 },
+    hard: { depth: 4, weight: 1.0 },
+    expert: { depth: 5, weight: 1.2 }
+};
+
 const initBoard = () => {
     board = Array(8).fill(null).map(() => Array(8).fill(null));
     board[3][3] = 'white';
@@ -65,6 +73,8 @@ const renderBoard = () => {
             boardElement.appendChild(tileElement);
         });
     });
+    
+    checkAndIndicatePass();
 };
 
 const handleTileClick = (row, col) => {
@@ -174,35 +184,16 @@ const aiMove = () => {
         messageElement.textContent = 'AI has no valid moves. AI passes turn.';
         currentPlayer = playerColor;
         renderBoard();
-        
         setTimeout(() => {
             messageElement.textContent = '';
             if (!hasValidMoves(board, playerColor)) {
                 checkWinCondition();
             }
         }, 2000);
-        
         return;
     }
 
-    const difficulty = difficultySelector.value;
-    let selectedMove;
-
-    if (difficulty === 'easy') {
-        selectedMove = validMoves[Math.floor(Math.random() * validMoves.length)];
-    } else if (difficulty === 'medium') {
-        let maxFlips = 0;
-        validMoves.forEach(({ row, col }) => {
-            const flips = makeMove(row, col, aiColor, true).length;
-            if (flips > maxFlips) {
-                maxFlips = flips;
-                selectedMove = { row, col };
-            }
-        });
-    } else if (difficulty === 'hard') {
-        selectedMove = minimax(board, aiColor, 3).move;
-    }
-
+    const selectedMove = minimax(board, aiColor, aiDepth).move;
     const { row, col } = selectedMove;
     const flippedTiles = makeMove(row, col, aiColor);
     logMove(row, col, flippedTiles.length);
@@ -215,9 +206,9 @@ const aiMove = () => {
     }, 500);
 };
 
-const minimax = (boardState, player, depth) => {
+const minimax = (boardState, player, depth, alpha = -Infinity, beta = Infinity) => {
     if (depth === 0 || isGameOver(boardState)) {
-        return { score: evaluateBoard(boardState, aiColor) };
+        return { score: evaluateBoardAdvanced(boardState, aiColor) };
     }
 
     const validMoves = [];
@@ -230,33 +221,39 @@ const minimax = (boardState, player, depth) => {
     });
 
     if (validMoves.length === 0) {
-        return { score: evaluateBoard(boardState, aiColor) };
+        return { score: evaluateBoardAdvanced(boardState, aiColor) };
     }
 
     let bestMove;
     if (player === aiColor) {
         let bestScore = -Infinity;
-        validMoves.forEach(({ row, col }) => {
+        for (let i = 0; i < validMoves.length; i++) {
+            const { row, col } = validMoves[i];
             const newBoard = JSON.parse(JSON.stringify(boardState));
             makeMove(row, col, player, true, newBoard);
-            const score = minimax(newBoard, playerColor, depth - 1).score;
+            const score = minimax(newBoard, playerColor, depth - 1, alpha, beta).score;
             if (score > bestScore) {
                 bestScore = score;
                 bestMove = { row, col };
             }
-        });
+            alpha = Math.max(alpha, score);
+            if (alpha >= beta) break;
+        }
         return { move: bestMove, score: bestScore };
     } else {
         let bestScore = Infinity;
-        validMoves.forEach(({ row, col }) => {
+        for (let i = 0; i < validMoves.length; i++) {
+            const { row, col } = validMoves[i];
             const newBoard = JSON.parse(JSON.stringify(boardState));
             makeMove(row, col, player, true, newBoard);
-            const score = minimax(newBoard, aiColor, depth - 1).score;
+            const score = minimax(newBoard, aiColor, depth - 1, alpha, beta).score;
             if (score < bestScore) {
                 bestScore = score;
                 bestMove = { row, col };
             }
-        });
+            beta = Math.min(beta, score);
+            if (alpha >= beta) break;
+        }
         return { move: bestMove, score: bestScore };
     }
 };
@@ -298,14 +295,19 @@ const passTurn = () => {
     );
     
     if (!validMoves) {
-        messageElement.textContent = `No valid moves. ${currentPlayer === playerColor ? 'Player' : 'AI'} passes turn.`;
         currentPlayer = currentPlayer === playerColor ? aiColor : playerColor;
-        checkWinCondition();
+        messageElement.textContent = '';
+        
         if (currentPlayer === aiColor) {
             setTimeout(aiMove, 500);
         }
+        
+        checkAndIndicatePass();
     } else {
         messageElement.textContent = 'You still have valid moves. You cannot pass.';
+        setTimeout(() => {
+            messageElement.textContent = '';
+        }, 2000);
     }
 };
 
@@ -370,6 +372,10 @@ const updateScores = () => {
 };
 
 function showGameOverModal(message) {
+    // Remove any existing modals first
+    const existingModals = document.querySelectorAll('.modal-overlay');
+    existingModals.forEach(modal => modal.remove());
+    
     // Create modal elements
     const modalOverlay = document.createElement('div');
     modalOverlay.className = 'modal-overlay';
@@ -395,14 +401,32 @@ function showGameOverModal(message) {
         modal.classList.add('show');
     });
     
-    // Handle button clicks
-    document.getElementById('playAgainBtn').addEventListener('click', () => {
-        modalOverlay.remove();
+    // Handle button clicks with proper cleanup
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    
+    const closeModal = () => {
+        modalOverlay.classList.remove('show');
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modalOverlay.remove();
+        }, 300);
+    };
+    
+    playAgainBtn.addEventListener('click', () => {
+        closeModal();
         initBoard();
     });
     
-    document.getElementById('closeModalBtn').addEventListener('click', () => {
-        modalOverlay.remove();
+    closeModalBtn.addEventListener('click', () => {
+        closeModal();
+    });
+    
+    // Optional: Close on overlay click
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+            closeModal();
+        }
     });
 }
 
@@ -507,3 +531,126 @@ document.addEventListener('DOMContentLoaded', () => {
     initBoard();
     createBoardCoordinates();
 });
+
+function evaluateBoardAdvanced(boardState, maximizingColor) {
+    let score = 0;
+    const minimizingColor = maximizingColor === 'white' ? 'black' : 'white';
+
+    // Corner weights
+    const corners = [
+        [0, 0], [0, 7], [7, 0], [7, 7]
+    ];
+    
+    // Edge positions (excluding corners)
+    const edges = [
+        [0, 2], [0, 3], [0, 4], [0, 5],
+        [7, 2], [7, 3], [7, 4], [7, 5],
+        [2, 0], [3, 0], [4, 0], [5, 0],
+        [2, 7], [3, 7], [4, 7], [5, 7]
+    ];
+
+    // Positions near corners
+    const nearCorners = [
+        [0, 1], [1, 0], [1, 1],  // near top-left
+        [0, 6], [1, 6], [1, 7],  // near top-right
+        [6, 0], [6, 1], [7, 1],  // near bottom-left
+        [6, 6], [6, 7], [7, 6]   // near bottom-right
+    ];
+
+    // Evaluate corners
+    corners.forEach(([row, col]) => {
+        if (boardState[row][col] === maximizingColor) score += CORNER_WEIGHT;
+        else if (boardState[row][col] === minimizingColor) score -= CORNER_WEIGHT;
+    });
+
+    // Evaluate edges
+    edges.forEach(([row, col]) => {
+        if (boardState[row][col] === maximizingColor) score += EDGE_WEIGHT;
+        else if (boardState[row][col] === minimizingColor) score -= EDGE_WEIGHT;
+    });
+
+    // Evaluate near-corner positions (penalty for occupying these)
+    nearCorners.forEach(([row, col]) => {
+        if (boardState[row][col] === maximizingColor) score += NEAR_CORNER_PENALTY;
+        else if (boardState[row][col] === minimizingColor) score -= NEAR_CORNER_PENALTY;
+    });
+
+    // Count pieces with diminishing importance
+    boardState.forEach((row, rowIndex) => {
+        row.forEach((tile, colIndex) => {
+            if (tile === maximizingColor) score += 1;
+            else if (tile === minimizingColor) score -= 1;
+        });
+    });
+
+    return score * aiWeight;
+}
+
+let aiDepth = DIFFICULTY_SETTINGS.medium.depth;
+let aiWeight = DIFFICULTY_SETTINGS.medium.weight;
+const CORNER_WEIGHT = 25;
+const EDGE_WEIGHT = 5;
+const NEAR_CORNER_PENALTY = -8;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const splashScreen = document.getElementById('splashScreen');
+    const difficultyButtons = document.querySelectorAll('.difficulty-button');
+    const difficultySelector = document.getElementById('difficulty');
+
+    difficultyButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Get the difficulty name from the button text
+            const difficulty = button.textContent.trim().toLowerCase();
+            
+            // Set the AI settings
+            const settings = DIFFICULTY_SETTINGS[difficulty];
+            aiDepth = settings.depth;
+            aiWeight = settings.weight;
+            
+            // Update the dropdown selection
+            difficultySelector.value = difficulty;
+            
+            // Hide splash screen and start game
+            splashScreen.style.display = 'none';
+            initBoard();
+        });
+    });
+});
+
+difficultySelector.addEventListener('change', (e) => {
+    const difficulty = e.target.value;
+    const settings = DIFFICULTY_SETTINGS[difficulty];
+    aiDepth = settings.depth;
+    aiWeight = settings.weight;
+    
+    // Optional: restart the game when difficulty changes
+    if (confirm('Change difficulty? This will restart the game.')) {
+        initBoard();
+    } else {
+        // Revert the selector to previous value if user cancels
+        difficultySelector.value = Object.entries(DIFFICULTY_SETTINGS)
+            .find(([_, settings]) => settings.depth === aiDepth)
+            ?.[0] || 'medium';
+    }
+});
+
+function checkAndIndicatePass() {
+    const currentColorToCheck = currentPlayer === playerColor ? playerColor : aiColor;
+    const hasValidMoves = board.some((row, rowIndex) =>
+        row.some((tile, colIndex) => 
+            tile === null && isValidMove(rowIndex, colIndex, currentColorToCheck))
+    );
+
+    const passButton = document.getElementById('passButton');
+    
+    if (!hasValidMoves && currentPlayer === playerColor) {
+        // Add visual indication that player must pass
+        passButton.classList.add('must-pass');
+        passButton.textContent = 'MUST PASS';
+        passButton.title = 'No valid moves available - you must pass';
+    } else {
+        passButton.classList.remove('must-pass');
+        passButton.textContent = 'PASS TURN';
+        passButton.title = '';
+    }
+}
