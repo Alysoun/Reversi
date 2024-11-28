@@ -85,8 +85,8 @@ const handleTileClick = (row, col) => {
         return;
     }
     
-    const flippedTiles = makeMove(row, col, playerColor);
-    logMove(row, col, flippedTiles.length);
+    const result = makeMove(row, col, playerColor);
+    logMove(row, col, result.flippedTiles.length, result.positions);
     currentPlayer = aiColor;
     messageElement.textContent = '';
     renderBoard();
@@ -165,7 +165,7 @@ const makeMove = (row, col, player, testMode = false, testBoard = board) => {
         }, 800);
     }
 
-    return flippedTiles;
+    return { flippedTiles, positions: flippedTiles };
 };
 
 const aiMove = () => {
@@ -195,8 +195,8 @@ const aiMove = () => {
 
     const selectedMove = minimax(board, aiColor, aiDepth).move;
     const { row, col } = selectedMove;
-    const flippedTiles = makeMove(row, col, aiColor);
-    logMove(row, col, flippedTiles.length);
+    const result = makeMove(row, col, aiColor);
+    logMove(row, col, result.flippedTiles.length, result.positions);
     currentPlayer = playerColor;
     renderBoard();
     updateScores();
@@ -317,27 +317,40 @@ function positionToNotation(row, col) {
     return `${columns[col]}${rows[row]}`;
 }
 
-function highlightMove(row, col) {
+function highlightMove(row, col, flippedTiles) {
     const tiles = document.querySelectorAll('.tile');
-    const index = row * 8 + col;
-    const tile = tiles[index];
-    if (tile) {
-        tile.classList.add('highlight-move');
+    
+    // Highlight played move
+    const playedIndex = row * 8 + col;
+    const playedTile = tiles[playedIndex];
+    if (playedTile) {
+        playedTile.classList.add('highlight-played-move');
     }
-}
-
-function removeHighlight() {
-    document.querySelectorAll('.highlight-move').forEach(tile => {
-        tile.classList.remove('highlight-move');
+    
+    // Highlight flipped tiles
+    flippedTiles.forEach(({row: fRow, col: fCol}) => {
+        const flippedIndex = fRow * 8 + fCol;
+        const flippedTile = tiles[flippedIndex];
+        if (flippedTile) {
+            flippedTile.classList.add('highlight-flipped');
+        }
     });
 }
 
-function logMove(row, col, flippedCount) {
+function removeHighlight() {
+    document.querySelectorAll('.highlight-played-move, .highlight-flipped')
+        .forEach(tile => {
+            tile.classList.remove('highlight-played-move', 'highlight-flipped');
+        });
+}
+
+function logMove(row, col, flippedCount, flippedTiles = []) {
     const moveNumber = moveLogBody.children.length + 1;
     const position = positionToNotation(row, col);
     const tr = document.createElement('tr');
     tr.dataset.row = row;
     tr.dataset.col = col;
+    tr.dataset.flippedTiles = JSON.stringify(flippedTiles);
     
     tr.innerHTML = `
         <td>${moveNumber}</td>
@@ -346,7 +359,7 @@ function logMove(row, col, flippedCount) {
         <td>${flippedCount}</td>
     `;
 
-    tr.addEventListener('mouseenter', () => highlightMove(row, col));
+    tr.addEventListener('mouseenter', () => highlightMove(row, col, flippedTiles));
     tr.addEventListener('mouseleave', () => removeHighlight());
     
     moveLogBody.appendChild(tr);
@@ -654,3 +667,48 @@ function checkAndIndicatePass() {
         passButton.title = '';
     }
 }
+
+// Add this function to handle theme-specific color labels
+function updateColorLabels(theme) {
+    const playerColorSelect = document.getElementById('playerColor');
+    const options = playerColorSelect.options;
+    
+    switch(theme) {
+        case 'neon':
+            options[0].text = 'Pink (First)';
+            options[1].text = 'Cyan (Second)';
+            break;
+        case 'dark':
+            options[0].text = 'Purple (First)';
+            options[1].text = 'Blue (Second)';
+            break;
+        case 'matrix':
+            options[0].text = 'Green (First)';
+            options[1].text = 'Dark Green (Second)';
+            break;
+        case 'ocean':
+            options[0].text = 'Light Blue (First)';
+            options[1].text = 'Deep Blue (Second)';
+            break;
+        case 'soft':
+            options[0].text = 'Light (First)';
+            options[1].text = 'Dark (Second)';
+            break;
+        default: // Classic theme
+            options[0].text = 'White (First)';
+            options[1].text = 'Black (Second)';
+    }
+}
+
+// Modify the existing theme switch handler
+themeSelector.addEventListener('change', (e) => {
+    const newTheme = e.target.value;
+    switchTheme(newTheme);
+    updateColorLabels(newTheme);
+});
+
+// Also update on initial load
+document.addEventListener('DOMContentLoaded', () => {
+    const currentTheme = themeSelector.value;
+    updateColorLabels(currentTheme);
+});
