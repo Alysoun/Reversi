@@ -1,6 +1,7 @@
+/* Multiple body declarations can be consolidated */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f5f7fa;
+    background-color: var(--primary-bg);
     background-image: 
         radial-gradient(circle at 100% 100%, rgba(76, 175, 80, 0.1) 0%, transparent 50%),
         radial-gradient(circle at 0% 0%, rgba(76, 175, 80, 0.05) 0%, transparent 50%);
@@ -8,13 +9,13 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
     min-height: 100vh;
+    margin: 0;
     padding: 20px 0;
     box-sizing: border-box;
     overflow-x: hidden;
 }
+/* Multiple container declarations */
 .container {
     text-align: center;
     width: 90%;
@@ -24,15 +25,8 @@ body {
     border-radius: 20px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(10px);
-    padding: 30px;
     margin: 20px auto;
     min-height: 100%;
-    margin: 0 auto;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    overflow-y: auto;
 }
 .game-area {
     display: flex;
@@ -307,7 +301,7 @@ select {
 }
 .dark-theme .tile.valid-move {
     background-color: #45a049;
-    box-shadow: 0 0 10px rgba(69,160,73,0.5);
+    box-shadow: inset 0 0 15px rgba(128, 0, 128, 0.3);
     border-color: #45a049;
     opacity: 0.7;
 }
@@ -386,11 +380,6 @@ select {
         padding: 10px;
         font-size: 16px;
     }
-
-    /* Prevent text scaling */
-    body {
-        -webkit-text-size-adjust: 100%;
-    }
 }
 
 /* For very small screens */
@@ -426,21 +415,9 @@ button, select {
     touch-action: manipulation;
 }
 
-/* Add these base styles to ensure proper mobile rendering */
-.container {
-    box-sizing: border-box;
-}
 
 *, *:before, *:after {
     box-sizing: inherit;
-}
-
-/* Update these existing styles */
-.container {
-    text-align: center;
-    width: 90%;
-    max-width: 900px;
-    padding: 20px;
 }
 
 .game-area {
@@ -849,9 +826,9 @@ select:focus {
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -862,69 +839,49 @@ select:focus {
 
 .modal {
     background: white;
-    padding: 30px 40px;
+    padding: 2rem;
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    text-align: center;
-    transform: translateY(-20px);
-    transition: transform 0.3s ease;
-    max-width: 400px;
-    width: 90%;
-}
-
-.modal.show {
-    transform: translateY(0);
+    transform: scale(0.7);
+    opacity: 0;
+    transition: all 0.3s ease;
 }
 
 .modal-overlay.show {
     opacity: 1;
 }
 
-.modal-title {
-    font-size: 24px;
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 10px;
-}
-
-.modal-message {
-    font-size: 16px;
-    color: #4a5568;
-    margin-bottom: 25px;
+.modal.show {
+    transform: scale(1);
+    opacity: 1;
 }
 
 .modal-buttons {
     display: flex;
     justify-content: center;
-    gap: 12px;
+    gap: 1rem;
+    margin-top: 1.5rem;
 }
 
 .modal-button {
-    padding: 10px 24px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 14px;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
     cursor: pointer;
-    transition: all 0.2s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    transition: background-color 0.2s;
 }
 
 .modal-button.primary {
-    background: #4CAF50;
+    background-color: #4CAF50;
     color: white;
-    border: none;
 }
 
 .modal-button.secondary {
-    background: transparent;
-    color: #4a5568;
-    border: 1px solid #cbd5e0;
+    background-color: #9e9e9e;
+    color: white;
 }
 
 .modal-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    filter: brightness(1.1);
 }
 
 /* Theme variations */
@@ -959,7 +916,8 @@ select:focus {
 /* Theme variations */
 .dark-theme .score {
     background: rgba(45, 55, 72, 0.85);
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(128, 0, 128, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .dark-theme .score p {
@@ -991,7 +949,7 @@ select:focus {
 .matrix-theme {
     --primary-bg: #000000;
     --board-bg: #001000;
-    --board-border: #003000;
+    --board-border: #00ff00;
     --tile-bg: #002000;
     --text-color: #00ff00;
     --accent-color: #00dd00;
@@ -1062,3 +1020,891 @@ select:focus {
 }
 
 /* Similar rules for other themes... */
+
+/* Mobile layout adjustments */
+@media screen and (max-width: 800px) {
+    .game-area {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    /* Reorder elements for mobile */
+    .right-panel {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 400px;
+        gap: 10px;
+    }
+
+    /* Move score directly under board */
+    .score {
+        order: -1; /* This moves it to the top of the right-panel flex container */
+        margin-top: 10px;
+        margin-bottom: 20px;
+    }
+
+    /* Adjust other controls spacing */
+    .controls {
+        margin-top: 10px;
+    }
+
+    .move-log-container {
+        margin-top: 10px;
+    }
+}
+
+.splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.splash-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 500px;
+    width: 90%;
+}
+
+.difficulty-options {
+    display: grid;
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.difficulty-button {
+    padding: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.difficulty-button:hover {
+    transform: translateY(-2px);
+}
+
+.difficulty-novice { background: #4CAF50; color: white; }
+.difficulty-easy { background: #2196F3; color: white; }
+.difficulty-medium { background: #FF9800; color: white; }
+.difficulty-hard { background: #F44336; color: white; }
+.difficulty-expert { background: #9C27B0; color: white; }
+
+.difficulty-description {
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    color: #666;
+}
+
+.pass-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+}
+
+.pass-notification.fade-out {
+    animation: fadeOut 0.5s ease-out forwards;
+}
+
+@keyframes slideIn {
+    from {
+        top: -50px;
+        opacity: 0;
+    }
+    to {
+        top: 20px;
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+    }
+}
+
+.pass-turn {
+    transition: all 0.3s ease;
+}
+
+.pass-turn.must-pass {
+    background-color: #ff9800 !important; /* Orange */
+    animation: pulse-gentle 2s infinite;
+    font-weight: bold;
+}
+
+@keyframes pulse-gentle {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.4);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 10px rgba(255, 152, 0, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 152, 0, 0);
+    }
+}
+
+/* Theme variations */
+.neon-theme .pass-turn.must-pass {
+    background-color: #ff1177 !important;
+    box-shadow: 0 0 15px #ff1177;
+}
+
+.dark-theme .pass-turn.must-pass {
+    background-color: #800080 !important;
+    box-shadow: 0 0 15px rgba(128, 0, 128, 0.5);
+}
+
+/* Dark Theme Base Styles */
+.dark-theme {
+    --primary-bg: #1a1a1a;
+    --board-bg: #2e2e2e;
+    --board-border: #404040;
+    --tile-bg: #404040;
+    --text-color: #ffffff;
+    --accent-color: #800080;
+    --shadow-color: rgba(128, 0, 128, 0.3);
+}
+
+.dark-theme body {
+    background-color: var(--primary-bg);
+    background-image: 
+        radial-gradient(circle at 100% 100%, rgba(128, 0, 128, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 0% 0%, rgba(128, 0, 128, 0.05) 0%, transparent 50%);
+}
+
+.dark-theme .container {
+    background: rgba(46, 46, 46, 0.95);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.dark-theme .board {
+    background-color: var(--board-bg);
+    border-color: var(--board-border);
+}
+
+.dark-theme .tile {
+    background-color: var(--tile-bg);
+}
+
+.dark-theme h1 {
+    color: var(--text-color);
+}
+
+.dark-theme .score {
+    background: rgba(45, 55, 72, 0.85);
+    border-color: rgba(128, 0, 128, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dark-theme .coordinate-label {
+    color: var(--text-color);
+}
+
+.dark-theme .move-log {
+    background: #2a2a2a;
+    border-color: #404040;
+}
+
+.dark-theme .move-log-container::-webkit-scrollbar-track {
+    background: #2a2a2a;
+}
+
+.dark-theme .move-log-container::-webkit-scrollbar-thumb {
+    background-color: #404040;
+}
+
+.dark-theme .move-log-table tr:hover {
+    background-color: rgba(128, 0, 128, 0.1);
+}
+
+.highlight-played-move {
+    position: relative;
+}
+
+.highlight-played-move::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 215, 0, 0.5); /* Gold color for played move */
+    z-index: 1;
+    pointer-events: none;
+}
+
+.highlight-flipped {
+    position: relative;
+}
+
+.highlight-flipped::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 191, 255, 0.5); /* Light blue for flipped tiles */
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Theme-specific highlights */
+.dark-theme .highlight-played-move::before {
+    background-color: rgba(128, 0, 128, 0.3); /* Purple tint */
+    box-shadow: 0 0 10px rgba(128, 0, 128, 0.3);
+}
+
+.dark-theme .highlight-flipped::before {
+    background-color: rgba(65, 105, 225, 0.3); /* Blue tint */
+    box-shadow: 0 0 10px rgba(65, 105, 225, 0.3);
+}
+
+.neon-theme .highlight-played-move::before {
+    background-color: rgba(255, 17, 119, 0.3);
+}
+
+.neon-theme .highlight-flipped::before {
+    background-color: rgba(0, 255, 255, 0.3);
+}
+
+.move-log-legend {
+    display: flex;
+    gap: 20px;
+    padding: 10px;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+    font-size: 0.9rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.legend-swatch.played-move {
+    background-color: rgba(128, 0, 128, 0.5);
+    box-shadow: 0 0 5px rgba(128, 0, 128, 0.3);
+}
+
+.legend-swatch.flipped-tiles {
+    background-color: rgba(65, 105, 225, 0.5);
+    box-shadow: 0 0 5px rgba(65, 105, 225, 0.3);
+}
+
+/* Theme-specific legend colors */
+.dark-theme .legend-swatch.played-move {
+    background-color: rgba(128, 0, 128, 0.5);
+    box-shadow: 0 0 5px rgba(128, 0, 128, 0.3);
+}
+
+.dark-theme .legend-swatch.flipped-tiles {
+    background-color: rgba(65, 105, 225, 0.5);
+    box-shadow: 0 0 5px rgba(65, 105, 225, 0.3);
+}
+
+.dark-theme .move-log-legend {
+    color: var(--text-color);
+}
+
+.neon-theme .legend-swatch.played-move {
+    background-color: rgba(255, 17, 119, 0.3);
+}
+
+.neon-theme .legend-swatch.flipped-tiles {
+    background-color: rgba(0, 255, 255, 0.3);
+}
+
+/* Add hover instruction */
+.move-log-legend::after {
+    content: '(Hover over move log entries to see highlights)';
+    font-size: 0.8rem;
+    font-style: italic;
+    opacity: 0.7;
+    margin-left: 10px;
+}
+
+.neon-theme {
+    --primary-bg: #000000;
+    --board-bg: #1a1a1a;
+    --board-border: #ff1177;
+    --tile-bg: #2a2a2a;
+    --text-color: #ff1177;
+    --accent-color: #0ff;
+    --shadow-color: rgba(255, 17, 119, 0.3);
+}
+
+.neon-theme .container {
+    background: rgba(0, 0, 0, 0.95);
+    box-shadow: 0 0 20px rgba(255, 17, 119, 0.2);
+    border: 1px solid rgba(255, 17, 119, 0.3);
+}
+
+.neon-theme .board {
+    border: 2px solid #ff1177;
+    box-shadow: 0 0 15px rgba(255, 17, 119, 0.5);
+}
+
+.neon-theme .tile {
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+}
+
+.neon-theme .tile.white::after {
+    background-color: #ff1177;
+    box-shadow: 0 0 10px #ff1177, 0 0 20px #ff1177;
+}
+
+.neon-theme .tile.black::after {
+    background-color: #0ff;
+    box-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+}
+
+.neon-theme .tile.valid-move {
+    box-shadow: inset 0 0 15px rgba(255, 17, 119, 0.5);
+}
+
+.neon-theme .move-log-container {
+    background-color: rgba(0, 0, 0, 0.9);
+    border: 1px solid #ff1177;
+    box-shadow: 0 0 10px rgba(255, 17, 119, 0.3);
+    color: #fff;
+}
+
+.neon-theme .move-log-table th {
+    background-color: rgba(255, 17, 119, 0.2);
+    color: #ff1177;
+    border-color: rgba(255, 17, 119, 0.3);
+}
+
+.neon-theme .move-log-table td {
+    border-color: rgba(255, 17, 119, 0.3);
+    color: #fff;
+}
+
+.neon-theme .move-log-table tr:hover {
+    background-color: rgba(255, 17, 119, 0.2);
+    box-shadow: 0 0 10px rgba(255, 17, 119, 0.2);
+}
+
+.neon-theme button {
+    background-color: rgba(255, 17, 119, 0.8);
+    border: 1px solid #ff1177;
+    box-shadow: 0 0 10px rgba(255, 17, 119, 0.3);
+    color: #fff;
+}
+
+.neon-theme button:hover {
+    background-color: #ff1177;
+    box-shadow: 0 0 15px rgba(255, 17, 119, 0.5);
+}
+
+.neon-theme select {
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 1px solid #ff1177;
+    color: #ff1177;
+}
+
+.neon-theme .score {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #ff1177;
+    box-shadow: 0 0 10px rgba(255, 17, 119, 0.3);
+    color: #fff;
+}
+
+.neon-theme .coordinate-label {
+    color: #ff1177;
+    text-shadow: 0 0 5px #ff1177;
+}
+
+.neon-theme .highlight-played-move::before {
+    background-color: rgba(255, 17, 119, 0.25);
+    box-shadow: 0 0 15px rgba(255, 17, 119, 0.25);
+}
+
+.neon-theme .highlight-flipped::before {
+    background-color: rgba(0, 255, 255, 0.25);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.25);
+}
+
+.neon-theme .move-log-legend {
+    color: #fff;
+}
+
+.neon-theme .legend-swatch {
+    border-color: rgba(255, 17, 119, 0.5);
+}
+
+/* Add glow animations */
+@keyframes neonPulse {
+    0% { opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { opacity: 0.8; }
+}
+
+.neon-theme .tile.white::after,
+.neon-theme .tile.black::after {
+    animation: neonPulse 2s infinite;
+}
+
+/* Soften the neon colors for better visibility */
+.neon-theme .move-log-table tr:hover {
+    background-color: rgba(255, 17, 119, 0.2);
+    box-shadow: 0 0 10px rgba(255, 17, 119, 0.2);
+}
+
+.neon-theme .highlight-played-move::before {
+    background-color: rgba(255, 17, 119, 0.25);
+    box-shadow: 0 0 15px rgba(255, 17, 119, 0.25);
+}
+
+.neon-theme .highlight-flipped::before {
+    background-color: rgba(0, 255, 255, 0.25);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.25);
+}
+
+/* Adjust legend colors to be more visible */
+.neon-theme .legend-swatch.played-move {
+    background-color: rgba(255, 17, 119, 0.5);
+    box-shadow: 0 0 10px rgba(255, 17, 119, 0.3);
+}
+
+.neon-theme .legend-swatch.flipped-tiles {
+    background-color: rgba(0, 255, 255, 0.5);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+/* Update the dark theme piece colors */
+.dark-theme .tile.white::after {
+    background-color: #800080; /* Purple */
+    border: 1px solid #666;
+    box-shadow: 0 0 10px rgba(128, 0, 128, 0.5);
+}
+
+.dark-theme .tile.black::after {
+    background-color: #4169e1; /* Royal Blue */
+    border: 1px solid #666;
+    box-shadow: 0 0 10px rgba(65, 105, 225, 0.5);
+}
+
+/* Add Soft Theme */
+.soft-theme {
+    --primary-bg: #f0f4f8;
+    --board-bg: #4a8b6c;
+    --board-border: #3a7055;
+    --tile-bg: #4a8b6c;
+    --text-color: #2d3748;
+    --accent-color: #38a169;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+.soft-theme body {
+    background-color: var(--primary-bg);
+    background-image: 
+        radial-gradient(circle at 100% 100%, rgba(74, 139, 108, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 0% 0%, rgba(74, 139, 108, 0.03) 0%, transparent 50%);
+}
+
+.soft-theme .container {
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+}
+
+.soft-theme .board {
+    background-color: var(--board-bg);
+    border-color: var(--board-border);
+}
+
+.soft-theme .tile {
+    background-color: var(--tile-bg);
+    opacity: 0.95;
+}
+
+.soft-theme .tile.white::after {
+    background-color: #f7fafc;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.soft-theme .tile.black::after {
+    background-color: #2d3748;
+    border: 1px solid #4a5568;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.soft-theme .tile.valid-move {
+    box-shadow: inset 0 0 10px rgba(56, 161, 105, 0.3);
+}
+
+.soft-theme .score {
+    background: rgba(247, 250, 252, 0.9);
+    border: 1px solid rgba(56, 161, 105, 0.2);
+}
+
+.soft-theme .score p {
+    color: #2d3748;
+}
+
+.soft-theme button {
+    background-color: #38a169;
+    opacity: 0.9;
+}
+
+.soft-theme button:hover {
+    opacity: 1;
+}
+
+.soft-theme select {
+    background-color: rgba(247, 250, 252, 0.9);
+    border: 1px solid #cbd5e0;
+    color: #2d3748;
+}
+
+.soft-theme .move-log-container {
+    background-color: rgba(247, 250, 252, 0.9);
+    border: 1px solid #e2e8f0;
+}
+
+.soft-theme .move-log-table th {
+    background-color: rgba(56, 161, 105, 0.1);
+    color: #2d3748;
+}
+
+/* Matrix Theme */
+.matrix-theme {
+    --primary-bg: #000000;
+    --board-bg: #001000;
+    --board-border: #00ff00;
+    --tile-bg: #002000;
+    --text-color: #00ff00;
+    --accent-color: #00dd00;
+    --shadow-color: rgba(0, 255, 0, 0.2);
+}
+
+.matrix-theme body {
+    background-color: var(--primary-bg);
+    background-image: 
+        linear-gradient(rgba(0, 15, 0, 0.9), rgba(0, 0, 0, 0.9)),
+        repeating-linear-gradient(transparent, transparent 50px, rgba(0, 255, 0, 0.05) 50px, rgba(0, 255, 0, 0) 100px);
+}
+
+.matrix-theme .container {
+    background: rgba(0, 10, 0, 0.9);
+    border: 1px solid rgba(0, 255, 0, 0.2);
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
+}
+
+.matrix-theme .tile {
+    background-color: #001500;
+    border: 1px solid rgba(0, 255, 0, 0.2);
+}
+
+.matrix-theme .tile.white::after {
+    background-color: #00ff00;
+    box-shadow: 0 0 10px #00ff00;
+    opacity: 0.8;
+}
+
+.matrix-theme .tile.black::after {
+    background-color: #003300;
+    box-shadow: 0 0 10px #006600;
+    border: 1px solid #00ff00;
+}
+
+.matrix-theme .tile.valid-move {
+    box-shadow: inset 0 0 15px rgba(0, 255, 0, 0.3);
+    animation: matrixPulse 2s infinite;
+}
+
+.matrix-theme button {
+    background-color: rgba(0, 255, 0, 0.2);
+    border: 1px solid #00ff00;
+    color: #00ff00;
+    text-shadow: 0 0 5px #00ff00;
+}
+
+.matrix-theme button:hover {
+    background-color: rgba(0, 255, 0, 0.3);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+}
+
+.matrix-theme .score, 
+.matrix-theme .move-log-container {
+    background: rgba(0, 20, 0, 0.9);
+    border: 1px solid #00ff00;
+    color: #00ff00;
+}
+
+/* Ocean Theme */
+.ocean-theme {
+    --primary-bg: #0a192f;
+    --board-bg: #1a365d;
+    --board-border: #2c5282;
+    --tile-bg: #2a4365;
+    --text-color: #e2e8f0;
+    --accent-color: #4299e1;
+    --shadow-color: rgba(66, 153, 225, 0.3);
+}
+
+.ocean-theme body {
+    background-color: var(--primary-bg);
+    background-image: 
+        radial-gradient(circle at 100% 100%, rgba(66, 153, 225, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 0% 0%, rgba(49, 130, 206, 0.1) 0%, transparent 50%);
+}
+
+.ocean-theme .container {
+    background: rgba(26, 54, 93, 0.9);
+    border: 1px solid rgba(66, 153, 225, 0.3);
+    box-shadow: 0 0 30px rgba(66, 153, 225, 0.2);
+}
+
+.ocean-theme .tile {
+    background-color: #2a4365;
+    border: 1px solid rgba(66, 153, 225, 0.3);
+}
+
+.ocean-theme .tile.white::after {
+    background-color: #90cdf4;
+    box-shadow: 0 0 15px rgba(144, 205, 244, 0.5);
+}
+
+.ocean-theme .tile.black::after {
+    background-color: #2b6cb0;
+    box-shadow: 0 0 15px rgba(43, 108, 176, 0.5);
+}
+
+.ocean-theme .tile.valid-move {
+    box-shadow: inset 0 0 15px rgba(66, 153, 225, 0.4);
+    animation: wavePulse 3s infinite;
+}
+
+.ocean-theme button {
+    background-color: #4299e1;
+    border: none;
+    box-shadow: 0 0 10px rgba(66, 153, 225, 0.3);
+}
+
+.ocean-theme button:hover {
+    background-color: #3182ce;
+    box-shadow: 0 0 15px rgba(66, 153, 225, 0.5);
+}
+
+.ocean-theme .score,
+.ocean-theme .move-log-container {
+    background: rgba(26, 54, 93, 0.8);
+    border: 1px solid rgba(66, 153, 225, 0.3);
+    color: #e2e8f0;
+}
+
+/* Animations */
+@keyframes matrixPulse {
+    0% { box-shadow: inset 0 0 15px rgba(0, 255, 0, 0.3); }
+    50% { box-shadow: inset 0 0 25px rgba(0, 255, 0, 0.5); }
+    100% { box-shadow: inset 0 0 15px rgba(0, 255, 0, 0.3); }
+}
+
+@keyframes wavePulse {
+    0% { box-shadow: inset 0 0 15px rgba(66, 153, 225, 0.4); }
+    50% { box-shadow: inset 0 0 25px rgba(66, 153, 225, 0.6); }
+    100% { box-shadow: inset 0 0 15px rgba(66, 153, 225, 0.4); }
+}
+
+/* Theme-specific legend colors */
+.matrix-theme .legend-swatch.played-move {
+    background-color: rgba(0, 255, 0, 0.5);
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+}
+
+.matrix-theme .legend-swatch.flipped-tiles {
+    background-color: rgba(0, 100, 0, 0.5);
+    box-shadow: 0 0 10px rgba(0, 100, 0, 0.3);
+}
+
+.ocean-theme .legend-swatch.played-move {
+    background-color: rgba(144, 205, 244, 0.5);
+    box-shadow: 0 0 10px rgba(144, 205, 244, 0.3);
+}
+
+.ocean-theme .legend-swatch.flipped-tiles {
+    background-color: rgba(43, 108, 176, 0.5);
+    box-shadow: 0 0 10px rgba(43, 108, 176, 0.3);
+}
+
+/* Matrix Theme Additional Styles */
+.matrix-theme select {
+    background-color: #001000;
+    color: #00ff00;
+    border: 1px solid #00ff00;
+}
+
+.matrix-theme select:hover {
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+}
+
+.matrix-theme .move-log-table th {
+    background-color: rgba(0, 255, 0, 0.1);
+    color: #00ff00;
+    border-color: rgba(0, 255, 0, 0.3);
+}
+
+.matrix-theme .move-log-table td {
+    color: #00ff00;
+    border-color: rgba(0, 255, 0, 0.2);
+}
+
+.matrix-theme .move-log-table tr:hover {
+    background-color: rgba(0, 255, 0, 0.1);
+}
+
+.matrix-theme h1 {
+    color: #00ff00;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+/* Ocean Theme Additional Styles */
+.ocean-theme select {
+    background-color: #1a365d;
+    color: #e2e8f0;
+    border: 1px solid #4299e1;
+}
+
+.ocean-theme select:hover {
+    box-shadow: 0 0 10px rgba(66, 153, 225, 0.3);
+}
+
+.ocean-theme .move-log-table th {
+    background-color: rgba(66, 153, 225, 0.1);
+    color: #e2e8f0;
+    border-color: rgba(66, 153, 225, 0.3);
+}
+
+.ocean-theme .move-log-table td {
+    color: #e2e8f0;
+    border-color: rgba(66, 153, 225, 0.2);
+}
+
+.ocean-theme .move-log-table tr:hover {
+    background-color: rgba(66, 153, 225, 0.1);
+}
+
+.ocean-theme h1 {
+    color: #e2e8f0;
+    text-shadow: 0 0 10px rgba(66, 153, 225, 0.5);
+}
+
+/* Coordinate labels for both themes */
+.matrix-theme .coordinate-label {
+    color: #00ff00;
+}
+
+.ocean-theme .coordinate-label {
+    color: #e2e8f0;
+}
+
+/* Matrix Theme Move Log Styles */
+.matrix-theme .move-log-container {
+    background: rgba(0, 10, 0, 0.95);
+    border: 1px solid #00ff00;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+}
+
+.matrix-theme .move-log-table {
+    border-color: rgba(0, 255, 0, 0.3);
+}
+
+.matrix-theme .move-log-table th {
+    background-color: rgba(0, 255, 0, 0.15);
+    color: #00ff00;
+    border-color: rgba(0, 255, 0, 0.3);
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+}
+
+.matrix-theme .move-log-table td {
+    border-color: rgba(0, 255, 0, 0.2);
+    color: #00ff00;
+}
+
+.matrix-theme .move-log-table tr:hover {
+    background-color: rgba(0, 255, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+}
+
+.matrix-theme .move-log-legend {
+    color: #00ff00;
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+}
+
+.matrix-theme .move-log-legend::after {
+    color: rgba(0, 255, 0, 0.7);
+}
+
+/* Ocean Theme Move Log Styles */
+.ocean-theme .move-log-container {
+    background: rgba(10, 25, 47, 0.95);
+    border: 1px solid #4299e1;
+    box-shadow: 0 0 15px rgba(66, 153, 225, 0.2);
+}
+
+.ocean-theme .move-log-table {
+    border-color: rgba(66, 153, 225, 0.3);
+}
+
+.ocean-theme .move-log-table th {
+    background-color: rgba(66, 153, 225, 0.15);
+    color: #90cdf4;
+    border-color: rgba(66, 153, 225, 0.3);
+    text-shadow: 0 0 5px rgba(66, 153, 225, 0.5);
+}
+
+.ocean-theme .move-log-table td {
+    border-color: rgba(66, 153, 225, 0.2);
+    color: #e2e8f0;
+}
+
+.ocean-theme .move-log-table tr:hover {
+    background-color: rgba(66, 153, 225, 0.1);
+    box-shadow: 0 0 10px rgba(66, 153, 225, 0.2);
+}
+
+.ocean-theme .move-log-legend {
+    color: #e2e8f0;
+    text-shadow: 0 0 5px rgba(66, 153, 225, 0.5);
+}
+
+.ocean-theme .move-log-legend::after {
+    color: rgba(226, 232, 240, 0.7);
+}
