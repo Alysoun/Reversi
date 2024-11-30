@@ -53,6 +53,9 @@ const initBoard = () => {
 
 const renderBoard = () => {
     boardElement.innerHTML = '';
+    const moveHelper = document.getElementById('moveHelper');
+    const showHints = moveHelper && moveHelper.checked;
+    
     board.forEach((row, rowIndex) => {
         row.forEach((tile, colIndex) => {
             const tileElement = document.createElement('div');
@@ -68,6 +71,17 @@ const renderBoard = () => {
                 tile === null && 
                 isValidMove(rowIndex, colIndex, playerColor)) {
                 tileElement.classList.add('valid-move');
+                
+                // Add flip count hint if helper is enabled
+                if (showHints) {
+                    const flippedCount = getFlipCount(rowIndex, colIndex, playerColor);
+                    if (flippedCount > 0) {
+                        const hintElement = document.createElement('div');
+                        hintElement.classList.add('move-count-hint');
+                        hintElement.textContent = flippedCount;
+                        tileElement.appendChild(hintElement);
+                    }
+                }
             }
             
             boardElement.appendChild(tileElement);
@@ -711,4 +725,40 @@ themeSelector.addEventListener('change', (e) => {
 document.addEventListener('DOMContentLoaded', () => {
     const currentTheme = themeSelector.value;
     updateColorLabels(currentTheme);
+});
+
+// Add this new helper function to calculate flip count
+const getFlipCount = (row, col, player, testBoard = board) => {
+    let count = 0;
+    
+    for (const { row: dRow, col: dCol } of directions) {
+        let r = row + dRow;
+        let c = col + dCol;
+        let tilesToFlip = [];
+        
+        while (r >= 0 && r < 8 && c >= 0 && c < 8) {
+            if (testBoard[r][c] === null) break;
+            if (testBoard[r][c] !== player) {
+                tilesToFlip.push({ row: r, col: c });
+            } else {
+                count += tilesToFlip.length;
+                break;
+            }
+            r += dRow;
+            c += dCol;
+        }
+    }
+    
+    return count;
+};
+
+// Add event listener for the helper checkbox
+document.addEventListener('DOMContentLoaded', () => {
+    const moveHelper = document.getElementById('moveHelper');
+    if (moveHelper) {
+        moveHelper.addEventListener('change', () => {
+            renderBoard();
+        });
+    }
+    // ... existing DOMContentLoaded code ...
 });
