@@ -15,6 +15,7 @@ let currentPlayer = 'player';
 let moveCount = 0;
 let playerColor = 'white';  // 'white' or 'black'
 let aiColor = 'black';      // opposite of playerColor
+let playerCorners = new Set(); // Track corners captured by player
 
 const directions = [
     { row: -1, col: 0 }, { row: 1, col: 0 }, // Vertical
@@ -49,6 +50,9 @@ const initBoard = () => {
             aiMove();
         }, 100);
     }
+    
+    playerCorners.clear(); // Reset corner tracking
+    achievementManager.startGame();
 };
 
 const renderBoard = () => {
@@ -67,26 +71,56 @@ const renderBoard = () => {
                 tileElement.addEventListener('click', () => handleTileClick(rowIndex, colIndex));
             }
             
+            // Valid move indicators with enhancements
             if (currentPlayer === playerColor && 
                 tile === null && 
                 isValidMove(rowIndex, colIndex, playerColor)) {
                 tileElement.classList.add('valid-move');
                 
-                // Add flip count hint if helper is enabled
+                // Show flip count if helper is enabled
                 if (showHints) {
                     const flippedCount = getFlipCount(rowIndex, colIndex, playerColor);
                     if (flippedCount > 0) {
                         const hintElement = document.createElement('div');
                         hintElement.classList.add('move-count-hint');
-                        hintElement.textContent = flippedCount;
+                        
+                        // Show corner values if unlocked
+                        if (achievementManager.features.showCornerValues && isCorner(rowIndex, colIndex)) {
+                            hintElement.classList.add('corner-value');
+                            hintElement.textContent = `${flippedCount} (+25)`;
+                        } else {
+                            hintElement.textContent = flippedCount;
+                        }
+                        
                         tileElement.appendChild(hintElement);
                     }
                 }
+                
+                // Show move suggestions if unlocked
+                if (achievementManager.features.moveSuggestions) {
+                    const moveScore = evaluateMoveScore(rowIndex, colIndex, playerColor);
+                    if (moveScore > 0) {
+                        tileElement.classList.add(`suggestion-${getMoveQualityClass(moveScore)}`);
+                    }
+                }
+            }
+            
+            // Show AI's potential moves if unlocked
+            if (achievementManager.features.showAIMoves && 
+                currentPlayer === aiColor && 
+                tile === null && 
+                isValidMove(rowIndex, colIndex, aiColor)) {
+                tileElement.classList.add('ai-potential-move');
             }
             
             boardElement.appendChild(tileElement);
         });
     });
+    
+    // Show score prediction if unlocked
+    if (achievementManager.features.scorePrediction) {
+        updateScorePrediction();
+    }
     
     checkAndIndicatePass();
 };
@@ -139,6 +173,16 @@ const makeMove = (row, col, player, testMode = false, testBoard = board) => {
     testBoard[row][col] = player;
     let flippedTiles = [];
     
+    // Track corner capture for the initial placement
+    if (!testMode && player === playerColor && isCorner(row, col)) {
+        playerCorners.add(`${row},${col}`);
+        
+        // Check for cornerMaster achievement
+        if (playerCorners.size === 4) {
+            achievementManager.unlockAchievement('cornerMaster');
+        }
+    }
+    
     for (const { row: dRow, col: dCol } of directions) {
         let r = row + dRow;
         let c = col + dCol;
@@ -153,6 +197,16 @@ const makeMove = (row, col, player, testMode = false, testBoard = board) => {
                     tilesToFlip.forEach(({ row, col }) => {
                         testBoard[row][col] = player;
                         flippedTiles.push({ row, col });
+                        
+                        // Track corner captures from flips
+                        if (player === playerColor && isCorner(row, col)) {
+                            playerCorners.add(`${row},${col}`);
+                            
+                            // Check for cornerMaster achievement
+                            if (playerCorners.size === 4) {
+                                achievementManager.unlockAchievement('cornerMaster');
+                            }
+                        }
                     });
                 }
                 break;
@@ -167,16 +221,38 @@ const makeMove = (row, col, player, testMode = false, testBoard = board) => {
         flippedTiles.forEach(({ row, col }) => {
             const index = row * 8 + col;
             const tile = tiles[index];
-            tile.classList.add('flipping');
-            setTimeout(() => {
-                tile.classList.remove('flipping');
-            }, 800);
+            
+            // Use special animations if unlocked
+            if (achievementManager.features.specialAnimations) {
+                tile.classList.add('special-flip');
+                setTimeout(() => {
+                    tile.classList.remove('special-flip');
+                }, 1000);
+            } else {
+                tile.classList.add('flipping');
+                setTimeout(() => {
+                    tile.classList.remove('flipping');
+                }, 800);
+            }
         });
+        
         const placedTile = tiles[row * 8 + col];
-        placedTile.classList.add('flipping');
-        setTimeout(() => {
-            placedTile.classList.remove('flipping');
-        }, 800);
+        if (achievementManager.features.specialAnimations) {
+            placedTile.classList.add('special-flip');
+            setTimeout(() => {
+                placedTile.classList.remove('special-flip');
+            }, 1000);
+        } else {
+            placedTile.classList.add('flipping');
+            setTimeout(() => {
+                placedTile.classList.remove('flipping');
+            }, 800);
+        }
+    }
+
+    // Check for quickFlip achievement
+    if (!testMode && flippedTiles.length >= 10) {
+        achievementManager.unlockAchievement('quickFlip');
     }
 
     return { flippedTiles, positions: flippedTiles };
@@ -474,6 +550,19 @@ const checkWinCondition = () => {
             message = `It's a tie!\nFinal Score - Player: ${playerScore}, AI: ${aiScore}`;
         }
         showGameOverModal(message);
+        
+        achievementManager.checkGameEndAchievements(
+            parseInt(playerScoreElement.textContent),
+            parseInt(aiScoreElement.textContent),
+            difficultySelector.value
+        );
+    }
+    
+    if (playerScore > aiScore && achievementManager.features.victoryAnimations) {
+        const playerPieces = document.querySelectorAll('.tile.white');
+        playerPieces.forEach(piece => {
+            piece.classList.add('victory-animation');
+        });
     }
 };
 
@@ -500,18 +589,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // Theme switching function
 function switchTheme(theme) {
     const body = document.body;
-    // Remove all existing theme classes
-    body.classList.remove(
-        'classic-theme',
-        'dark-theme',
-        'neon-theme',
-        'matrix-theme',
-        'cyberpunk-theme',
-        'ocean-theme'
-    );
-    
-    // Add the new theme class
-    body.classList.add(`${theme}-theme`);
+    // Set the theme using data attribute
+    body.setAttribute('data-theme', theme);
     
     // Save theme preference
     localStorage.setItem('reversiTheme', theme);
@@ -762,3 +841,88 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // ... existing DOMContentLoaded code ...
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    // ... existing code ...
+
+    const achievementsButton = document.getElementById('achievementsButton');
+    const achievementsPanel = document.getElementById('achievementsPanel');
+    const closeAchievements = document.getElementById('closeAchievements');
+    const resetAchievements = document.getElementById('resetAchievements');
+    
+    achievementsButton.addEventListener('click', () => {
+        achievementsPanel.classList.add('show');
+        achievementManager.renderAchievementsList();
+    });
+    
+    closeAchievements.addEventListener('click', () => {
+        achievementsPanel.classList.remove('show');
+    });
+    
+    resetAchievements.addEventListener('click', () => {
+        achievementManager.resetAchievements();
+    });
+    
+    // Optional: Close on clicking outside the panel
+    achievementsPanel.addEventListener('click', (e) => {
+        if (e.target === achievementsPanel) {
+            achievementsPanel.classList.remove('show');
+        }
+    });
+});
+
+// Helper functions for the new features
+function isCorner(row, col) {
+    return (row === 0 || row === 7) && (col === 0 || col === 7);
+}
+
+function evaluateMoveScore(row, col, player) {
+    let score = getFlipCount(row, col, player);
+    if (isCorner(row, col)) score += 25;
+    return score;
+}
+
+function getMoveQualityClass(score) {
+    if (score >= 25) return 'excellent';
+    if (score >= 10) return 'good';
+    if (score >= 5) return 'fair';
+    return 'poor';
+}
+
+function updateScorePrediction() {
+    const predictedScores = calculatePredictedScores();
+    const predictionElement = document.createElement('div');
+    predictionElement.className = 'score-prediction';
+    predictionElement.innerHTML = `
+        <span>Predicted Outcome:</span>
+        <span class="${predictedScores.player > predictedScores.ai ? 'winning' : 'losing'}">
+            ${predictedScores.player} - ${predictedScores.ai}
+        </span>
+    `;
+    document.querySelector('.score').appendChild(predictionElement);
+}
+
+function calculatePredictedScores() {
+    // Simple prediction based on current score and available moves
+    let playerScore = parseInt(playerScoreElement.textContent);
+    let aiScore = parseInt(aiScoreElement.textContent);
+    let playerMoves = countValidMoves(playerColor);
+    let aiMoves = countValidMoves(aiColor);
+    
+    return {
+        player: playerScore + Math.floor(playerMoves * 0.6),
+        ai: aiScore + Math.floor(aiMoves * 0.6)
+    };
+}
+
+function countValidMoves(color) {
+    let count = 0;
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            if (board[row][col] === null && isValidMove(row, col, color)) {
+                count++;
+            }
+        }
+    }
+    return count;
+}

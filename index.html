@@ -32,6 +32,7 @@
                         <input type="checkbox" id="moveHelper" class="helper-checkbox">
                         <label for="moveHelper">Show move hints</label>
                     </div>
+                    <button id="achievementsButton" class="achievements-button">🏆 Achievements</button>
                 </div>
                 <div class="score">
                     <p>Player: <span id="playerScore">2</span></p>
@@ -43,8 +44,9 @@
                         <option value="classic">Classic</option>
                         <option value="dark">Dark</option>
                         <option value="neon">Neon</option>
-                        <!-- <option value="matrix">Matrix</option> -->
-                        <!-- <option value="ocean">Ocean</option> -->
+                        <option value="matrix">Matrix</option>
+                        <option value="ocean">Ocean</option>
+                        <option value="golden">Golden</option>
                     </select>
                 </div>
                 <div id="message" class="message"></div>
@@ -85,6 +87,18 @@
             </div>
         </div>
     </div>
+    <div id="achievementsPanel" class="achievements-panel">
+        <div class="achievements-content">
+            <h2>Achievements</h2>
+            <div id="achievementsList" class="achievements-list">
+                <!-- Achievements will be populated here -->
+            </div>
+            <div class="achievements-buttons">
+                <button id="resetAchievements" class="reset-achievements">Reset All Achievements</button>
+                <button id="closeAchievements" class="close-achievements">Close</button>
+            </div>
+        </div>
+    </div>
     <div id="splashScreen" class="splash-screen">
         <div class="splash-content">
             <h2>Welcome to Reversi</h2>
@@ -98,6 +112,7 @@
             </div>
         </div>
     </div>
+    <script src="achievements.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
